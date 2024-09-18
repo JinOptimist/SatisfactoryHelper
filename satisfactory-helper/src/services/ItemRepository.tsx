@@ -1,20 +1,29 @@
 import { Item } from "@/models";
 import { useRouter } from "next/navigation";
 
-export function useItems(){
-	const router = useRouter();
+export function useItems() {
+  const router = useRouter();
 
-	function addItem(name: string) {
-		const item = { name } as Item;
-		const body = JSON.stringify({item});
-		fetch("/api/items", { method: "POST", body: body })
-		  .then((response) => response.json())
-		  .then(() => {
-			router.push("/admin/item/list");
-		  });
-	}
-	
-	return {
-		addItem
-	}
+  function addItem(name: string) {
+    const item = { name } as Item;
+    const body = JSON.stringify({ item });
+    fetch("/api/items", { method: "POST", body: body })
+      .then((response) => response.json())
+      .then(() => {
+        router.push("/admin/item/list");
+      });
+  }
+
+  function getItems(onDone: (items: Item[]) => void) {
+    fetch("/api/items", { method: "GET" })
+      .then((response) => response.json())
+      .then((receiptsFromDb) => {
+        onDone(receiptsFromDb as Item[]);
+      });
+  }
+
+  return {
+    addItem,
+    getItems,
+  };
 }

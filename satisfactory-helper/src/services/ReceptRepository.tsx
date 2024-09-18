@@ -1,34 +1,30 @@
-import { Item, ItemAndCount, Recept } from "@/models";
+import { Item } from "@/models";
+import { Recipe } from "@/models/Recipe";
+import { useRouter } from "next/navigation";
 
-const ironRod = {
-  name: "Железный прут",
-} as Item;
+export function useRecipe() {
+  const router = useRouter();
 
-const ironIngot = {
-  name: "Железный слиток",
-} as Item;
+  function addRecipe(name: string) {
+    const item = { name } as Item;
+    const body = JSON.stringify({ item });
+    fetch("/api/recipes", { method: "POST", body: body })
+      .then((response) => response.json())
+      .then(() => {
+        router.push("/admin/recipe/list");
+      });
+  }
 
-const screw = {
-	name: "Винты",
-  } as Item;
-  
-const ironRodRecept = {
-  produced: ironRod,
-  producingPerMinute: 15,
-  consumption: [{ item: ironIngot, count: 15 } as ItemAndCount],
-} as Recept;
+  function getRecipes(onDone: (items: Recipe[]) => void) {
+    fetch("/api/recipes", { method: "GET" })
+      .then((response) => response.json())
+      .then((recipesFromDb) => {
+        onDone(recipesFromDb as Recipe[]);
+      });
+  }
 
-
-const screwRecept = {
-  produced: screw,
-  producingPerMinute: 40,
-  consumption: [{ item: ironRod, count: 10 } as ItemAndCount],
-} as Recept;
-
-function getAllReceipts() {
-  return [ironRodRecept, screwRecept];
+  return {
+    addRecipe,
+    getRecipes,
+  };
 }
-
-const receptRepository = { getAllReceipts };
-
-export default receptRepository;

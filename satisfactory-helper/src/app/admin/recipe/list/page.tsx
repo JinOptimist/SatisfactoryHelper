@@ -1,20 +1,23 @@
 "use client";
 
-import { Recept } from "@/models";
-import receptRepository from "@/services/ReceptRepository";
+import { Recipe } from "@/models/Recipe";
+import { useRecipe } from "@/services/ReceptRepository";
 import { useEffect, useState } from "react";
 
 export default function List() {
-  const { getAllReceipts } = receptRepository;
-  const [Recipes, setRecipes] = useState<Recept[]>([]);
+  const [Recipes, setRecipes] = useState<Recipe[]>([]);
+  const { getRecipes } = useRecipe();
+
   useEffect(() => {
-    const receiptsFromDb = getAllReceipts();
-    setRecipes(receiptsFromDb);
+    getRecipes(setRecipes);
   }, []);
+
   return (
     <div>
       {Recipes.map((x) => (
-        <div key={x.id}>{x.produced.name}</div>
+        <div key={x.id}>
+          {x.id} ({x.id})
+        </div>
       ))}
     </div>
   );

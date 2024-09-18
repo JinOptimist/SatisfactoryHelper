@@ -12,7 +12,6 @@ export default function CreateRecipe() {
   return (
     <div>
       create Recipe:
-      {/* <input value={name} onChange={onNameChange}></input> */}
       <select onChange={onItemChange}>
         <option></option>
       </select>

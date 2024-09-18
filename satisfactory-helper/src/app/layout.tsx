@@ -32,8 +32,8 @@ export default function RootLayout({
         <div className="flex flex-row gap-6">
           <Link href={"/admin/item/list"}>Все Предметы</Link>
 		  <Link href={"/admin/item/create"}>Создать Предмет</Link>
-		  <Link href={"/admin/recipe/list"}>Все рецепты</Link>
-		  <Link href={"/admin/recipe/create"}>Создать рецепт</Link>
+		  {/* <Link href={"/admin/recipe/list"}>Все рецепты</Link>
+		  <Link href={"/admin/recipe/create"}>Создать рецепт</Link> */}
         </div>
         {children}
       </body>
