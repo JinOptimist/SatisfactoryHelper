@@ -1,49 +1,41 @@
 "use client";
 
-import { Item } from "@/models";
-import { useItems } from "@/services/UseItems";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { RecipeItemSelector } from "smileComponents";
+import { ItemAndCount } from "@/models";
+import { useCallback, useState } from "react";
+import { Button, RecipeItemSelector } from "smileComponents";
 
 export default function CreateRecipe() {
-  const [items, setItems] = useState<Item[]>([]);
-  const { getItems } = useItems();
-
   const [producedId, setProducedId] = useState<number>();
+  const [producedCount, setProducedCount] = useState<number>();
 
-  useEffect(() => {
-    getItems().then(setItems);
+  const updateProduced = useCallback((itemAndCount: ItemAndCount) => {
+    setProducedId(itemAndCount.item.id);
+    setProducedCount(itemAndCount.count);
   }, []);
 
-  const onItemChange = useCallback((evt: ChangeEvent<HTMLSelectElement>) => {
-    setProducedId(+evt.target.value);
+  const createRecipe = useCallback(() => {
+	
   }, []);
 
   return (
     <div>
       <div>Создание рецепта</div>
-      <div className="flex">
+      <div className="flex border">
         <div className="flex-1">
-          consumption
+          Требуется
           <RecipeItemSelector
             onChange={(x) => console.log(x)}
           ></RecipeItemSelector>
+		  
+		  <Button onClick={createRecipe}>+</Button>
         </div>
         <div className="flex-1 produce">
-          <div>
-            producedId:{producedId}
-            <select onChange={onItemChange}>
-              {items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <input type="number" placeholder="Сколько в минуту" />
-          </div>
+          Производим
+          <RecipeItemSelector onChange={updateProduced}></RecipeItemSelector>
         </div>
+      </div>
+      <div>
+        <Button onClick={createRecipe}>Создать</Button>
       </div>
     </div>
   );
