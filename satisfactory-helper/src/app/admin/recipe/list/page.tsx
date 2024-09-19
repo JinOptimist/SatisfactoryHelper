@@ -1,27 +1,25 @@
-"use client";
+'use client';
 
-import { Recipe } from "@/models/Recipe";
+import { Recipe } from '@/models/Recipe';
 import { useRecipe } from "@/services/UseRecipe";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { ListItem, ListWrapper } from 'smileComponents';
 
 export default function List() {
-  const [Recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const { getRecipes } = useRecipe();
 
   useEffect(() => {
-    getRecipes().then(response => {
-		setRecipes(response);
-		console.log(response);
-	});
+    getRecipes().then(setRecipes);
   }, []);
 
   return (
-    <div>
-      {Recipes.map((recipe) => (
-        <div key={recipe.id}>
-          {recipe.produced.name} ({recipe.id})
-        </div>
+    <ListWrapper>
+      {recipes.map((x) => (
+        <ListItem key={x.id}>
+          {x.id} ({x.id})
+        </ListItem>
       ))}
-    </div>
+    </ListWrapper>
   );
 }
