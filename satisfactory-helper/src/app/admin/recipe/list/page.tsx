@@ -3,7 +3,7 @@
 import { Recipe } from "@/models/Recipe";
 import { useRecipe } from "@/services/UseRecipe";
 import { useEffect, useState } from "react";
-import { ListItem, ListWrapper } from "smileComponents";
+import { ListItem, ListWrapper, RecipeItemSelector } from "smileComponents";
 
 export default function List() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -17,16 +17,23 @@ export default function List() {
     <ListWrapper>
       {recipes.map((recipe) => (
         <ListItem key={recipe.id}>
-          <div className="recipe flex">
+          <div className="recipe flex flex-1">
             <div className="consumption flex-1">
               {recipe.consumption.map((itemAndCount) => (
-                <div key={itemAndCount.item.id}>
-                  {itemAndCount.item.name}: {itemAndCount.count}
-                </div>
+                <RecipeItemSelector
+                  key={itemAndCount.item.id}
+                  item={itemAndCount.item}
+                  count={itemAndCount.count}
+                  readonly
+                ></RecipeItemSelector>
               ))}
             </div>
             <div className="produced flex-1">
-              {recipe.produced.name} ({recipe.id})
+              <RecipeItemSelector
+                item={recipe.produced}
+                count={recipe.producingPerMinute}
+                readonly
+              ></RecipeItemSelector>
             </div>
           </div>
         </ListItem>
