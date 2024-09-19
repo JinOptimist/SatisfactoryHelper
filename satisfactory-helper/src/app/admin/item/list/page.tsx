@@ -6,16 +6,16 @@ import { useEffect, useState } from 'react';
 import { ListWrapper, ListItem } from 'smileComponents';
 
 export default function List() {
-  const [Recipes, setRecipes] = useState<Item[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const { getItems } = useItems();
 
   useEffect(() => {
-    getItems(setRecipes);
+    getItems(setItems);
   }, []);
 
   return (
     <ListWrapper>
-      {Recipes.map((x) => (
+      {items.map((x) => (
         <ListItem key={x.id}>
           {x.name} ({x.id})
         </ListItem>

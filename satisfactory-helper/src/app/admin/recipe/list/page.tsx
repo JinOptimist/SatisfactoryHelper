@@ -9,7 +9,8 @@ export default function List() {
   const { getRecipes } = useRecipe();
 
   useEffect(() => {
-    getRecipes(setRecipes);
+    getRecipes().then((r) => console.log(r));
+    setRecipes([]);
   }, []);
 
   return (

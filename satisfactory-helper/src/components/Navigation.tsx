@@ -17,6 +17,7 @@ export const Navigation = () => {
       {tabs.map((tabProps) => (
         <Link
           {...tabProps}
+		  key={tabProps.key}
           className={`text-neutral-200 py-6 px-2 hover:bg-menu-hover bg-center relative after:absolute after:w-full after:h-0.5 after:bg-satisfactory after:-bottom-0.5 after:left-0 hover:after:visible ${
             tabProps.href === pathname ? 'text-satisfactory after:visible bg-menu-hover' : 'after:invisible'
           }`}
