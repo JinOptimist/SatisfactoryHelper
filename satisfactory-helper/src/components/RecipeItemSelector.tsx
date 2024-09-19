@@ -9,10 +9,13 @@ import { InputField } from './Input';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 
 type RecipeItemSelectorProps = {
-  onChange: (data: { item: Item; count: number }) => void;
+  item?: Item;
+  count?: number;
+  readonly?: boolean;
+  onChange?: (data: { item: Item; count: number }) => void;
 };
 
-export const RecipeItemSelector = ({ onChange }: RecipeItemSelectorProps) => {
+export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemSelectorProps) => {
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<Item | undefined>(undefined);
@@ -24,13 +27,25 @@ export const RecipeItemSelector = ({ onChange }: RecipeItemSelectorProps) => {
   }, []);
 
   useEffect(() => {
-    if (selectedItem) {
+    if (props.item) {
+      setSelectedItem(props.item);
+    }
+  }, [props.item]);
+
+  useEffect(() => {
+    if (props.count) {
+      setCount(props.count);
+    }
+  }, [props.count]);
+
+  useEffect(() => {
+    if (selectedItem && onChange) {
       onChange({
         count,
         item: selectedItem,
       });
     }
-  }, [selectedItem, count]);
+  }, [onChange, selectedItem, count]);
 
   const getItems = useCallback(
     () => items.filter(({ name }) => name.toLowerCase().includes(search.toLowerCase())),
@@ -42,14 +57,15 @@ export const RecipeItemSelector = ({ onChange }: RecipeItemSelectorProps) => {
       <div>
         <Menu>
           <MenuButton
-            className={`text-left w-60 mb-2 py-2 px-4 bg-satisfactory hover:bg-amber-500 rounded ${
+            className={`text-left w-60 mb-2 py-2 px-4 bg-satisfactory rounded ${
               !selectedItem ? 'text-neutral-500' : ''
-            }`}
+            } ${readonly ? '' : 'hover:bg-amber-500'}`}
+            disabled={readonly}
           >
             {({ active }) => (
               <div className="flex items-center justify-between">
-                {selectedItem ? selectedItem.name : 'Items'}{' '}
-                {active ? <ChevronUpIcon className="size-6" /> : <ChevronDownIcon className="size-6" />}
+                {selectedItem ? selectedItem.name : 'Select item'}
+                {!readonly && (active ? <ChevronUpIcon className="size-6" /> : <ChevronDownIcon className="size-6" />)}
               </div>
             )}
           </MenuButton>
@@ -79,6 +95,7 @@ export const RecipeItemSelector = ({ onChange }: RecipeItemSelectorProps) => {
         onChange={(event) => setCount(+event.target.value)}
         placeholder="item name"
         className="max-w-20"
+        disabled={readonly}
       />
     </div>
   );
