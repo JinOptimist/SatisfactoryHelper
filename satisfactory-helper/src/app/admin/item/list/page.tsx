@@ -10,7 +10,7 @@ export default function List() {
   const { getItems } = useItems();
 
   useEffect(() => {
-    getItems(setItems);
+	getItems().then(setItems);
   }, []);
 
   return (

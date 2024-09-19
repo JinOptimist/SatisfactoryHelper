@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.1.8",
+    "@heroicons/react": "^2.1.5",
     "@neondatabase/serverless": "^0.9.5",
     "@types/lodash": "^4.17.7",
     "lodash": "^4.17.21",
