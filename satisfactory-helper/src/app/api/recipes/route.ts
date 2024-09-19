@@ -37,7 +37,8 @@ SELECT
 FROM recipe R
 	LEFT JOIN recipe_consumption RC ON R.id = RC.recipeId
 	LEFT JOIN items IR ON R.producedId = IR.id
-	LEFT JOIN items IRC ON RC.itemId = IRC.id`;
+	LEFT JOIN items IRC ON RC.itemId = IRC.id
+WHERE 1 = 1 `;
 
   return data;
 }

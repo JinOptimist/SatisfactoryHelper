@@ -8,6 +8,7 @@ const tabs = [
   { key: 1, href: '/admin/item/create', children: 'Создать Предмет' },
   { key: 2, href: '/admin/recipe/list', children: 'Все рецепты' },
   { key: 3, href: '/admin/recipe/create', children: 'Создать рецепт' },
+  { key: 4, href: '/outpost', children: 'Аванпост' },
 ];
 
 export const Navigation = () => {

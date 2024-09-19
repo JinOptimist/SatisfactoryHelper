@@ -20,46 +20,62 @@ export function useRecipe() {
       .then((response) => response.json())
       .then((data) => {
         const recipesFromDb = data as RecipeFromDb[];
-
-        const recipes: Recipe[] = [];
-
-        const recipeIds = _.uniq(recipesFromDb.map((x) => x.recipeid));
-        recipeIds.forEach((recipeId) => {
-          const currentRecipesFromDb = recipesFromDb.filter(
-            (x) => x.recipeid == recipeId
-          );
-          const recipeFromDb = currentRecipesFromDb[0];
-          const recipe = {
-            id: recipeId,
-            produced: {
-              id: recipeFromDb.produceditemid,
-              name: recipeFromDb.produceditemname,
-            } as Item,
-            producingPerMinute: recipeFromDb.perminute,
-            consumption: [],
-          } as Recipe;
-
-          currentRecipesFromDb.forEach((currentRecipeFromDb) => {
-            const itemAndCount = {
-              item: {
-                id: currentRecipeFromDb.consumptionitemid,
-                name: currentRecipeFromDb.consumptionitemname,
-              } as Item,
-              count: currentRecipeFromDb.consumptioncount,
-            } as ItemAndCount;
-            recipe.consumption.push(itemAndCount);
-          });
-
-          recipes.push(recipe);
-        });
-
+        const recipes = mapRecipeFromDbToRecipe(recipesFromDb);
         return recipes;
       });
+  }
+
+  function getRecipeByItemId(itemId: number): Promise<Recipe> {
+    return fetch(`/api/recipes/${itemId}`, { method: "GET" })
+      .then((response) => response.json())
+      .then((data) => {
+        const recipesFromDb = data as RecipeFromDb[];
+
+        const recipes = mapRecipeFromDbToRecipe(recipesFromDb);
+        return recipes[0];
+      });
+  }
+
+  function mapRecipeFromDbToRecipe(recipesFromDb: RecipeFromDb[]): Recipe[] {
+    const recipes: Recipe[] = [];
+
+    const recipeIds = _.uniq(recipesFromDb.map((x) => x.recipeid));
+    recipeIds.forEach((recipeId) => {
+      const currentRecipesFromDb = recipesFromDb.filter(
+        (x) => x.recipeid == recipeId
+      );
+      const recipeFromDb = currentRecipesFromDb[0];
+      const recipe = {
+        id: recipeId,
+        produced: {
+          id: recipeFromDb.produceditemid,
+          name: recipeFromDb.produceditemname,
+        } as Item,
+        producingPerMinute: recipeFromDb.perminute,
+        consumption: [],
+      } as Recipe;
+
+      currentRecipesFromDb.forEach((currentRecipeFromDb) => {
+        const itemAndCount = {
+          item: {
+            id: currentRecipeFromDb.consumptionitemid,
+            name: currentRecipeFromDb.consumptionitemname,
+          } as Item,
+          count: currentRecipeFromDb.consumptioncount,
+        } as ItemAndCount;
+        recipe.consumption.push(itemAndCount);
+      });
+
+      recipes.push(recipe);
+    });
+
+    return recipes;
   }
 
   return {
     addRecipe,
     getRecipes,
+    getRecipeByItemId,
   };
 }
 
