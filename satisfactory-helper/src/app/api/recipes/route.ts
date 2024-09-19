@@ -3,11 +3,11 @@
 import { Recipe } from "@/models/Recipe";
 import { neon, Pool } from "@neondatabase/serverless";
 
-async function createItem(recipe: Recipe) {
+async function createRecipe(recipe: Recipe) {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const client = await pool.connect();
   const insertRecipeResponse = await client.query(
-    `INSERT INTO persons (producedId, producingPerMinute) VALUES ($1, $2) RETURNING id;`,
+    `INSERT INTO recipe (producedId, producingPerMinute) VALUES ($1, $2) RETURNING id`,
     [recipe.produced.id, recipe.producingPerMinute]
   );
   const recipeId = insertRecipeResponse.rows[0].id;
@@ -15,7 +15,7 @@ async function createItem(recipe: Recipe) {
   for (let i = 0; i < recipe.consumption.length; i++) {
     const consumption = recipe.consumption[i];
     await client.query(
-      `INSERT INTO recipe_consumption (recipeId, itemId, count) VALUES ($1, $2, $4)`,
+      `INSERT INTO recipe_consumption (recipeId, itemId, count) VALUES ($1, $2, $3)`,
       [recipeId, consumption.item.id, consumption.count]
     );
   }
@@ -43,8 +43,9 @@ FROM recipe R
 }
 
 export async function POST(request: Request) {
-  const name = (await request.json()).item.name;
-  const data = await createItem(name);
+  const test = await request.json();
+  const recipe = test.recipe as Recipe;
+  const data = await createRecipe(recipe);
   return Response.json(data);
 }
 
