@@ -1,7 +1,7 @@
 "use client";
 
 import { Item } from "@/models";
-import { useItems } from "@/services/ItemRepository";
+import { useItems } from "@/services/UseItems";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { RecipeItemSelector } from "smileComponents";
 

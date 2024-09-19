@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 
 import { Item } from '@/models';
-import { useItems } from '@/services/ItemRepository';
+import { useItems } from '@/services/UseItems';
 import { InputField } from './Input';
 import { Button } from './Button';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';

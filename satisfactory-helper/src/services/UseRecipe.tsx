@@ -32,10 +32,10 @@ export function useRecipe() {
           const recipe = {
             id: recipeId,
             produced: {
-              id: recipeFromDb.consumptionitemid,
-              name: recipeFromDb.consumptionitemname,
+              id: recipeFromDb.produceditemid,
+              name: recipeFromDb.produceditemname,
             } as Item,
-            producingPerMinute: recipeFromDb.consumptioncount,
+            producingPerMinute: recipeFromDb.perminute,
             consumption: [],
           } as Recipe;
 

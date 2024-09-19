@@ -1,7 +1,7 @@
 'use client';
 
 import { InputField, Button } from 'smileComponents';
-import { useItems } from '@/services/ItemRepository';
+import { useItems } from '@/services/UseItems';
 import { ChangeEvent, useCallback, useState } from 'react';
 
 export default function CreateRecipe() {
