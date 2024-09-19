@@ -7,6 +7,7 @@ import { Item } from '@/models';
 import { useItems } from '@/services/UseItems';
 import { InputField } from './Input';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
+import { isNumber } from 'lodash';
 
 type RecipeItemSelectorProps = {
   item?: Item;
@@ -29,11 +30,13 @@ export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemS
   useEffect(() => {
     if (props.item) {
       setSelectedItem(props.item);
+    } else {
+      setSelectedItem(undefined);
     }
   }, [props.item]);
 
   useEffect(() => {
-    if (props.count) {
+    if (isNumber(props.count)) {
       setCount(props.count);
     }
   }, [props.count]);
@@ -53,11 +56,11 @@ export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemS
   );
 
   return (
-    <div className="flex flex-row gap-2 items-start">
+    <div className="flex flex-row gap-2 items-start relative">
       <div>
         <Menu>
           <MenuButton
-            className={`text-left w-60 mb-2 py-2 px-4 bg-satisfactory rounded ${
+            className={`text-left w-72 mb-2 py-2 px-4 bg-satisfactory rounded ${
               !selectedItem ? 'text-neutral-500' : ''
             } ${readonly ? '' : 'hover:bg-amber-500'}`}
             disabled={readonly}
@@ -69,13 +72,16 @@ export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemS
               </div>
             )}
           </MenuButton>
-          <MenuItems className="py-2 px-2 bg-neutral-200 rounded flex flex-col gap-2 max-w-60">
+          <MenuItems className="py-2 px-2 bg-neutral-200 rounded flex flex-col gap-2 w-72 absolute">
             <InputField value={search} onChange={(event) => setSearch(event.target.value)} placeholder="item name" />
             <div className="max-h-40 overflow-y-auto flex flex-col gap-2">
               {getItems().map((item) => (
                 <MenuItem key={item.id}>
                   <button
-                    onClick={() => setSelectedItem(item)}
+                    onClick={() => {
+                      setSelectedItem(item);
+                      setSearch('');
+                    }}
                     className={`hover:bg-neutral-300 py-2 px-2 rounded text-left border ${
                       selectedItem?.id === item.id ? 'bg-neutral-300' : ''
                     }`}
