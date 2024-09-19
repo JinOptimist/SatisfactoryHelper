@@ -42,7 +42,7 @@ export const RecipeItemSelector = ({ onChange }: RecipeItemSelectorProps) => {
     <div className="flex flex-row gap-2 items-start">
       <div>
         <Menu>
-          <MenuButton as={Button} className={`text-left w-60 mb-2 ${!selectedItem ? 'text-neutral-500' : ''}`}>
+          <MenuButton className={`text-left w-60 mb-2 py-2 px-4 bg-satisfactory hover:bg-amber-500 rounded ${!selectedItem ? 'text-neutral-500' : ''}`}>
             {({ active }) => (
               <div className="flex items-center justify-between">
                 {selectedItem ? selectedItem.name : 'Items'}{' '}

@@ -3,6 +3,7 @@
 import { Item } from "@/models";
 import { useItems } from "@/services/ItemRepository";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { RecipeItemSelector } from "smileComponents";
 
 export default function CreateRecipe() {
   const [items, setItems] = useState<Item[]>([]);
@@ -11,7 +12,7 @@ export default function CreateRecipe() {
   const [producedId, setProducedId] = useState<number>();
 
   useEffect(() => {
-    getItems(setItems);
+    getItems().then(setItems);
   }, []);
 
   const onItemChange = useCallback((evt: ChangeEvent<HTMLSelectElement>) => {
@@ -23,10 +24,14 @@ export default function CreateRecipe() {
       <div>Создание рецепта</div>
       <div className="flex">
         <div className="flex-1">
-			consumption
-		</div>
+          consumption
+          <RecipeItemSelector
+            onChange={(x) => console.log(x)}
+          ></RecipeItemSelector>
+        </div>
         <div className="flex-1 produce">
           <div>
+            producedId:{producedId}
             <select onChange={onItemChange}>
               {items.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -36,7 +41,7 @@ export default function CreateRecipe() {
             </select>
           </div>
           <div>
-            <input type="number"  placeholder="Сколько в минуту" />
+            <input type="number" placeholder="Сколько в минуту" />
           </div>
         </div>
       </div>
