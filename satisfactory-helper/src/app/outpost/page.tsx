@@ -27,7 +27,6 @@ export default function Outpost() {
         getRecipeByItemId(itemAndCount.item.id).then((recipe) => {
           setProducedOnOutpost((oldProducedOnOutpost) => {
             const newProducedOnOutpost = [...oldProducedOnOutpost];
-
             newProducedOnOutpost[index] = {
               recipe,
               factoryCount: itemAndCount.count,
@@ -59,11 +58,15 @@ export default function Outpost() {
     setProducedOnOutpost((old) => [...old, {} as ItemDeepInfo]);
   }, [setProducedOnOutpost]);
 
-  //   useEffect(() => {
-  //     if (itemDeepInfo?.recipe) {
-  //       setTotalConsumption(itemDeepInfo.recipe.consumption);
-  //     }
-  //   }, [itemDeepInfo]);
+    useEffect(() => {
+      if (producedOnOutpost) {
+		const totalConsumption:ItemAndCount[] = [];
+
+		producedOnOutpost.map(x=>x.recipe.consumption);
+
+        setTotalConsumption(totalConsumption);
+      }
+    }, [producedOnOutpost]);
 
   return (
     <div className="flex gap-4">
