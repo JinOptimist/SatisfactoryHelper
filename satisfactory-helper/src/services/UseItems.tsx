@@ -1,9 +1,7 @@
 import { Item } from '@/models';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function useItems() {
-  const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -13,7 +11,7 @@ export function useItems() {
       const item = { name } as Item;
       const body = JSON.stringify({ item });
       await fetch('/api/items', { method: 'POST', body: body });
-      router.push('/admin/item/list');
+      await getItems();
     } finally {
       setLoading(false);
     }
@@ -44,6 +42,7 @@ export function useItems() {
     addItem,
     getItems,
     getItemsFromCache,
+    items,
     loading,
   };
 }

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { useCallback, useEffect, useState } from 'react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 
-import { Item } from "@/models";
-import { useItems } from "@/services/UseItems";
-import { InputField } from "./Input";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/16/solid";
-import { isNumber } from "lodash";
+import { Item } from '@/models';
+import { useItems } from '@/services/UseItems';
+import { InputField } from './Input';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
+import { isNumber } from 'lodash';
 
 type RecipeItemSelectorProps = {
   item?: Item;
@@ -16,13 +16,9 @@ type RecipeItemSelectorProps = {
   onChange?: (data: { item: Item; count: number }) => void;
 };
 
-export const RecipeItemSelector = ({
-  onChange,
-  readonly,
-  ...props
-}: RecipeItemSelectorProps) => {
+export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemSelectorProps) => {
   const [items, setItems] = useState<Item[]>([]);
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<Item | undefined>(undefined);
   const [count, setCount] = useState<number>(0);
   const { getItemsFromCache } = useItems();
@@ -45,16 +41,8 @@ export const RecipeItemSelector = ({
     }
   }, [props.count]);
 
-  //   onChange({
-  // 	count,
-  // 	item: selectedItem,
-  //   });
-
   const getItems = useCallback(
-    () =>
-      items.filter(({ name }) =>
-        name.toLowerCase().includes(search.toLowerCase())
-      ),
+    () => items.filter(({ name }) => name.toLowerCase().includes(search.toLowerCase())),
     [search, items]
   );
 
@@ -64,24 +52,20 @@ export const RecipeItemSelector = ({
         <Menu>
           <MenuButton
             className={`text-left w-72 mb-2 py-2 px-4 bg-satisfactory rounded ${
-              !selectedItem ? "text-neutral-500" : ""
-            } ${readonly ? "" : "hover:bg-amber-500"}`}
+              !selectedItem ? 'text-neutral-500' : ''
+            } ${readonly ? '' : 'hover:bg-amber-500'}`}
             disabled={readonly}
           >
             {({ active }) => (
               <div className="flex items-center justify-between">
-                {selectedItem ? selectedItem.name : "Select item"}
-                {!readonly &&
-                  (active ? (
-                    <ChevronUpIcon className="size-6" />
-                  ) : (
-                    <ChevronDownIcon className="size-6" />
-                  ))}
+                {selectedItem ? selectedItem.name : 'Select item'}
+                {!readonly && (active ? <ChevronUpIcon className="size-6" /> : <ChevronDownIcon className="size-6" />)}
               </div>
             )}
           </MenuButton>
           <MenuItems className="py-2 px-2 bg-neutral-200 rounded flex flex-col gap-2 w-72 absolute">
             <InputField
+              autoFocus
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="item name"
@@ -92,14 +76,14 @@ export const RecipeItemSelector = ({
                   <button
                     onClick={() => {
                       setSelectedItem(item);
-                      setSearch("");
+                      setSearch('');
                       onChange?.({
                         count,
                         item,
                       });
                     }}
                     className={`hover:bg-neutral-300 py-2 px-2 rounded text-left border ${
-                      selectedItem?.id === item.id ? "bg-neutral-300" : ""
+                      selectedItem?.id === item.id ? 'bg-neutral-300' : ''
                     }`}
                   >
                     {item.name}
