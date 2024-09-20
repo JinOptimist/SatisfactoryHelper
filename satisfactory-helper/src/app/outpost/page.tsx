@@ -5,6 +5,7 @@ import { Recipe } from "@/models/Recipe";
 import { useRecipe } from "@/services/UseRecipe";
 import { useCallback, useEffect, useState } from "react";
 import { Button, RecipeItemSelector, Spinner } from "smileComponents";
+import './print.css';
 
 export default function Outpost() {
   const { getRecipeByItemId } = useRecipe();
@@ -130,7 +131,7 @@ export default function Outpost() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 outpost">
       <h2 className="mb-4 flex items-center">
         <span className="text-2xl text-amber-500 text-center grow">
           Аванпост
