@@ -4,7 +4,7 @@ import { ItemAndCount } from '@/models';
 import { Recipe } from '@/models/Recipe';
 import { useRecipe } from '@/services/UseRecipe';
 import { useCallback, useEffect, useState } from 'react';
-import { Button, RecipeItemSelector } from 'smileComponents';
+import { Button, RecipeItemSelector, Spinner } from 'smileComponents';
 
 export default function Outpost() {
   const { getRecipeByItemId } = useRecipe();
@@ -13,6 +13,8 @@ export default function Outpost() {
 
   const [totalConsumption, setTotalConsumption] = useState<ItemAndCount[]>([]);
   const [totalRemains, setTotalRemains] = useState<ItemAndCount[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onChangeRecipe = useCallback(
     (index: number, itemAndCount: ItemAndCount) => {
@@ -63,6 +65,7 @@ export default function Outpost() {
       return;
     }
 
+    setLoading(true);
     const totalConsumption: ItemAndCount[] = [];
     const remains: ItemAndCount[] = [];
 
@@ -103,6 +106,7 @@ export default function Outpost() {
     const totalConsumptionMinusProducing = totalConsumption.filter((c) => c.count > 0);
     const totalProducingMinusConsumption = remains.filter((c) => c.count > 0);
 
+    setLoading(false);
     setTotalConsumption(totalConsumptionMinusProducing);
     setTotalRemains(totalProducingMinusConsumption);
   }, [producedOnOutpost]);
@@ -116,7 +120,7 @@ export default function Outpost() {
       </h2>
       <div className="flex gap-4">
         <div className="flex-1">
-          <h3 className="text-lg mb-4">Производим на этой площадке</h3>
+          <h3 className="text-lg mb-2">Производим на этой площадке</h3>
           {producedOnOutpost.map((itemInfo, index) => (
             <div key={itemInfo?.recipe?.produced.id ?? 1}>
               <RecipeItemSelector
@@ -126,7 +130,7 @@ export default function Outpost() {
               ></RecipeItemSelector>
 
               {isProduceTargetSelected && (
-                <h3 className="text-lg mb-4">Производиться в минуту {itemInfo?.totalPerMinute}</h3>
+                <h3 className="text-lg mb-4">Производиться в минуту: {itemInfo?.totalPerMinute}</h3>
               )}
             </div>
           ))}
@@ -141,16 +145,21 @@ export default function Outpost() {
           </div>
         </div>
 
+        {loading && (
+          <div className="flex-1">
+            <Spinner />
+          </div>
+        )}
         {isProduceTargetSelected && (
           <div className="flex-1">
-            <h3 className="text-lg mb-4">Закидываем на эту площадку</h3>
+            <h3 className="text-lg mb-2">Закидываем на эту площадку</h3>
             <div>
               {totalConsumption.map(({ item, count }) => (
                 <RecipeItemSelector key={item.id} item={item} count={count} readonly />
               ))}
             </div>
 
-            <h3 className="text-lg mb-4">Остаток</h3>
+            <h3 className="text-lg mb-2">Остаток</h3>
             <div>
               {totalRemains.map(({ item, count }) => (
                 <RecipeItemSelector key={item.id} item={item} count={count} readonly />

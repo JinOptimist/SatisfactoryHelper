@@ -81,7 +81,7 @@ export default function CreateRecipe() {
           ))}
           <div className="flex gap-1">
             <Button onClick={addConsumption}>+</Button>
-            <Button onClick={clearRecipe} className="bg-neutral-800 text-neutral-50">
+            <Button onClick={clearRecipe} className="!bg-neutral-800 text-neutral-50">
               Очистить
             </Button>
           </div>
