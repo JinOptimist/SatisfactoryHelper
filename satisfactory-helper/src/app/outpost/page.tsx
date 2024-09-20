@@ -59,24 +59,42 @@ export default function Outpost() {
   }, [setProducedOnOutpost]);
 
   useEffect(() => {
-    if (producedOnOutpost && producedOnOutpost[0]?.recipe?.produced) {
-      const totalConsumption: ItemAndCount[] = producedOnOutpost
-        .map(x => x.recipe.consumption)
-        .reduce((total, consumptionFromOneRecipe) => {
-          consumptionFromOneRecipe.forEach(itemAndCount => {
-            const existedItem = total.find(x => x.item.id == itemAndCount.item.id);
-            if (existedItem) {
-              existedItem.count += itemAndCount.count
-            } else {
-              total.push(itemAndCount);
-            }
-          })
-
-          return total;
-        }, []);
-
-      setTotalConsumption(totalConsumption);
+    const realProducing = producedOnOutpost
+      .filter(x => x.recipe);
+    if (!realProducing || realProducing.length == 0) {
+      return;
     }
+
+    const totalConsumption: ItemAndCount[] = producedOnOutpost
+      .filter(x => x.recipe)
+      //.map(x => x.recipe.consumption)
+      .reduce((total: ItemAndCount[], itemInfo) => {
+        const consumptionFromOneRecipe = itemInfo.recipe.consumption;
+        consumptionFromOneRecipe.forEach(itemAndCount => {
+          const existedItem = total.find(x => x.item.id == itemAndCount.item.id);
+          if (existedItem) {
+            existedItem.count += itemAndCount.count
+          } else {
+            total.push({
+              item: itemAndCount.item,
+              count: itemAndCount.count * itemInfo.factoryCount
+            });
+          }
+        });
+
+        return total
+      }, []);
+
+    totalConsumption.forEach(consumption => {
+      const producing = realProducing.find(x => x.recipe.produced.id == consumption.item.id);
+      if (producing) {
+        consumption.count -= producing.totalPerMinute;
+      }
+    })
+
+    const totalConsumptionMinusProducing = totalConsumption.filter(c => c.count > 0);
+
+    setTotalConsumption(totalConsumptionMinusProducing);
   }, [producedOnOutpost]);
 
   return (
