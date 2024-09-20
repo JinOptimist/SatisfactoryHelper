@@ -7,4 +7,21 @@
 		height: 100%;
 		overflow: visible;
 	}
-  }
+
+	.one-factory {
+		border-top: 1px solid #ccc;
+	}
+
+	.production-info {
+		font-size: 12px;
+		padding-left: 40px;
+	}
+
+	.one-factory svg {
+		display: none;
+	}
+
+	h3.result {
+		border: 1px solid #ccc;
+	}
+}
