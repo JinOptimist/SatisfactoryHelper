@@ -2,14 +2,20 @@
 
 import { InputField, Button } from 'smileComponents';
 import { useItems } from '@/services/UseItems';
-import { ChangeEvent, useCallback, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { Item } from '@/models';
 
 export default function CreateRecipe() {
   const [name, setName] = useState('');
+  const [items, setItems] = useState<Item[]>([]);
 
-  const { addItem } = useItems();
+  const { addItem, getItemsFromCache } = useItems();
+
+  useEffect(() => {
+    getItemsFromCache().then(setItems);
+  }, []);
 
   const onNameChange = useCallback((evt: ChangeEvent<HTMLInputElement>) => {
     setName(evt.target.value);
@@ -18,6 +24,11 @@ export default function CreateRecipe() {
   const create = useCallback(() => {
     addItem(name);
   }, [name]);
+
+  const getFilteredItems = useCallback(
+    () => items.filter((item) => item.name.toLowerCase().includes(name.toLowerCase())),
+    [name, items]
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -31,6 +42,11 @@ export default function CreateRecipe() {
       <div className="flex">
         <InputField value={name} onChange={onNameChange} placeholder="Название предмета" className="grow" />
       </div>
+      <ul className="flex flex-row flex-wrap gap-4">
+        {getFilteredItems().map((item) => (
+          <li>{item.name}</li>
+        ))}
+      </ul>
       <div className="self-center">
         <Button onClick={create} disabled={!name.trim()} className="bg-amber-500">
           Create
