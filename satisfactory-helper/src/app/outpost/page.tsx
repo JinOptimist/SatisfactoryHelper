@@ -1,17 +1,15 @@
-"use client";
+'use client';
 
-import { ItemAndCount } from "@/models";
-import { Recipe } from "@/models/Recipe";
-import { useRecipe } from "@/services/UseRecipe";
-import { useCallback, useEffect, useState } from "react";
-import { Button, RecipeItemSelector } from "smileComponents";
+import { ItemAndCount } from '@/models';
+import { Recipe } from '@/models/Recipe';
+import { useRecipe } from '@/services/UseRecipe';
+import { useCallback, useEffect, useState } from 'react';
+import { Button, RecipeItemSelector } from 'smileComponents';
 
 export default function Outpost() {
   const { getRecipeByItemId } = useRecipe();
 
-  const [producedOnOutpost, setProducedOnOutpost] = useState<ItemDeepInfo[]>(
-    []
-  );
+  const [producedOnOutpost, setProducedOnOutpost] = useState<ItemDeepInfo[]>([{} as ItemDeepInfo]);
 
   const [totalConsumption, setTotalConsumption] = useState<ItemAndCount[]>([]);
   const [totalRemains, setTotalRemains] = useState<ItemAndCount[]>([]);
@@ -55,9 +53,12 @@ export default function Outpost() {
     setProducedOnOutpost((old) => [...old, {} as ItemDeepInfo]);
   }, [setProducedOnOutpost]);
 
+  const clearRecipe = useCallback(() => {
+    setProducedOnOutpost([{} as ItemDeepInfo]);
+  }, [setProducedOnOutpost]);
+
   useEffect(() => {
-    const realProducing = producedOnOutpost
-      .filter(x => x.recipe);
+    const realProducing = producedOnOutpost.filter((x) => x.recipe);
     if (!realProducing || realProducing.length == 0) {
       return;
     }
@@ -66,86 +67,97 @@ export default function Outpost() {
     const remains: ItemAndCount[] = [];
 
     producedOnOutpost
-      .filter(x => x.recipe)
+      .filter((x) => x.recipe)
       .forEach((itemInfo) => {
         const consumptionFromOneRecipe = itemInfo.recipe.consumption;
-        consumptionFromOneRecipe.forEach(itemAndCount => {
-          const existedItem = totalConsumption.find(x => x.item.id == itemAndCount.item.id);
+        consumptionFromOneRecipe.forEach((itemAndCount) => {
+          const existedItem = totalConsumption.find((x) => x.item.id == itemAndCount.item.id);
           if (existedItem) {
-            existedItem.count += itemAndCount.count
+            existedItem.count += itemAndCount.count;
           } else {
             totalConsumption.push({
               item: itemAndCount.item,
-              count: itemAndCount.count * itemInfo.factoryCount
+              count: itemAndCount.count * itemInfo.factoryCount,
             });
           }
         });
 
         remains.push({
           item: itemInfo.recipe.produced,
-          count: itemInfo.totalPerMinute
+          count: itemInfo.totalPerMinute,
         });
       });
 
-    totalConsumption.forEach(consumption => {
-      var peaceOfRemains = remains.find(x => x.item.id == consumption.item.id);
-      if (peaceOfRemains){
+    totalConsumption.forEach((consumption) => {
+      var peaceOfRemains = remains.find((x) => x.item.id == consumption.item.id);
+      if (peaceOfRemains) {
         peaceOfRemains.count -= consumption.count;
       }
 
-      const producing = realProducing.find(x => x.recipe.produced.id == consumption.item.id);
+      const producing = realProducing.find((x) => x.recipe.produced.id == consumption.item.id);
       if (producing) {
         consumption.count -= producing.totalPerMinute;
       }
-    })
+    });
 
-    const totalConsumptionMinusProducing = totalConsumption.filter(c => c.count > 0);
-    const totalProducingMinusConsumption = remains.filter(c => c.count > 0);
+    const totalConsumptionMinusProducing = totalConsumption.filter((c) => c.count > 0);
+    const totalProducingMinusConsumption = remains.filter((c) => c.count > 0);
 
     setTotalConsumption(totalConsumptionMinusProducing);
     setTotalRemains(totalProducingMinusConsumption);
   }, [producedOnOutpost]);
 
+  const isProduceTargetSelected = producedOnOutpost.find(({ recipe }) => !!recipe);
+
   return (
-    <div className="flex gap-4">
-      <div className="flex-1">
-        <div>Производим на этой площадке</div>
-        <Button onClick={addProducing}>+</Button>
-        {producedOnOutpost.map((itemInfo, index) => (
-          <div key={itemInfo?.recipe?.produced.id ?? 1}>
-            <RecipeItemSelector
-              onChange={(itemAndCount) => onChangeRecipe(index, itemAndCount)}
-              item={itemInfo?.recipe?.produced}
-              count={itemInfo?.factoryCount ?? 1}
-            ></RecipeItemSelector>
-            Производиться в минуту {itemInfo?.totalPerMinute}
-          </div>
-        ))}
-      </div>
-      <div className="flex-1">
-        <div>Закидываем на эту площадку</div>
-        <div>
-          {totalConsumption.map(({ item, count }) => (
-            <RecipeItemSelector
-              key={item.id}
-              item={item}
-              count={count}
-              readonly
-            />
+    <div className="flex flex-col gap-4">
+      <h2 className="mb-4 flex items-center">
+        <span className="text-2xl text-amber-500 text-center grow">Аванпост</span>
+      </h2>
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <h3 className="text-lg mb-4">Производим на этой площадке</h3>
+          {producedOnOutpost.map((itemInfo, index) => (
+            <div key={itemInfo?.recipe?.produced.id ?? 1}>
+              <RecipeItemSelector
+                onChange={(itemAndCount) => onChangeRecipe(index, itemAndCount)}
+                item={itemInfo?.recipe?.produced}
+                count={itemInfo?.factoryCount ?? 1}
+              ></RecipeItemSelector>
+
+              {isProduceTargetSelected && (
+                <h3 className="text-lg mb-4">Производиться в минуту {itemInfo?.totalPerMinute}</h3>
+              )}
+            </div>
           ))}
+
+          <div className="flex gap-1 mt-2">
+            <Button onClick={addProducing} className="bg-amber-500">
+              +
+            </Button>
+            <Button onClick={clearRecipe} className="!bg-neutral-800 text-neutral-50">
+              Очистить
+            </Button>
+          </div>
         </div>
 
-        <div>Остаток</div>
-        <div>
-          {totalRemains.map(({ item, count }) => (
-            <RecipeItemSelector
-              key={item.id}
-              item={item}
-              count={count}
-              readonly
-            />
-          ))}
-        </div>
+        {isProduceTargetSelected && (
+          <div className="flex-1">
+            <h3 className="text-lg mb-4">Закидываем на эту площадку</h3>
+            <div>
+              {totalConsumption.map(({ item, count }) => (
+                <RecipeItemSelector key={item.id} item={item} count={count} readonly />
+              ))}
+            </div>
+
+            <h3 className="text-lg mb-4">Остаток</h3>
+            <div>
+              {totalRemains.map(({ item, count }) => (
+                <RecipeItemSelector key={item.id} item={item} count={count} readonly />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

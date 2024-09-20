@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 const tabs = [
   { href: '/admin/item/list', children: 'Все Предметы', slug: 'item' },
   { href: '/admin/recipe/list', children: 'Все рецепты', slug: 'recipe' },
-  { href: '/outpost', children: 'Аванпост' },
+  { href: '/outpost', children: 'Аванпост', slug: 'outpost' },
 ];
 
 export const Navigation = () => {
