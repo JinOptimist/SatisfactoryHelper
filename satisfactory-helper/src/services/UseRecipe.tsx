@@ -3,87 +3,66 @@
 import { Item } from '@/models';
 import { ItemAndCount, Recipe } from '@/models/Recipe';
 import _ from 'lodash';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient } from './client';
 
-export function useRecipe() {
-  const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
+export const useGetRecipe = () =>
+  useQuery<Recipe[]>({
+    retry: 1,
+    queryKey: ['recipe'],
+    queryFn: () =>
+      fetch('/api/recipes', { method: 'GET' })
+        .then((res) => res.json())
+        .then(mapRecipeFromDbToRecipe)
+        .catch(() => []),
+  });
 
-  function addRecipe(recipe: Recipe) {
-    const body = JSON.stringify({ recipe });
-    fetch('/api/recipes', { method: 'POST', body: body })
-      .then((response) => response.json())
-      .then(() => {
-        router.push('/admin/recipe/list');
-      });
-  }
+export const useAddRecipe = () =>
+  useMutation({
+    mutationFn: (recipe: Recipe) => {
+      const body = JSON.stringify({ recipe });
+      return fetch('/api/recipes', { method: 'POST', body: body });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recipe'] });
+    },
+  });
 
-  const getRecipes = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/recipes', { method: 'GET' });
-      const recipesFromDb = (await response.json()) as RecipeFromDb[];
-      const recipes = mapRecipeFromDbToRecipe(recipesFromDb);
-      return recipes;
-    } catch (e) {
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
+export const getRecipeByItemId = async (itemId: number) =>
+  queryClient.getQueryData<Recipe[]>(['recipe'])?.find(({ id }) => id === itemId);
 
-  function getRecipeByItemId(itemId: number): Promise<Recipe> {
-    return fetch(`/api/recipes/${itemId}`, { method: 'GET' })
-      .then((response) => response.json())
-      .then((data) => {
-        const recipesFromDb = data as RecipeFromDb[];
+function mapRecipeFromDbToRecipe(recipesFromDb: RecipeFromDb[]): Recipe[] {
+  const recipes: Recipe[] = [];
 
-        const recipes = mapRecipeFromDbToRecipe(recipesFromDb);
-        return recipes[0];
-      });
-  }
+  const recipeIds = _.uniq(recipesFromDb.map((x) => x.recipeid));
+  recipeIds.forEach((recipeId) => {
+    const currentRecipesFromDb = recipesFromDb.filter((x) => x.recipeid == recipeId);
+    const recipeFromDb = currentRecipesFromDb[0];
+    const recipe = {
+      id: recipeId,
+      produced: {
+        id: recipeFromDb.produceditemid,
+        name: recipeFromDb.produceditemname,
+      } as Item,
+      producingPerMinute: recipeFromDb.perminute,
+      consumption: [],
+    } as Recipe;
 
-  function mapRecipeFromDbToRecipe(recipesFromDb: RecipeFromDb[]): Recipe[] {
-    const recipes: Recipe[] = [];
-
-    const recipeIds = _.uniq(recipesFromDb.map((x) => x.recipeid));
-    recipeIds.forEach((recipeId) => {
-      const currentRecipesFromDb = recipesFromDb.filter((x) => x.recipeid == recipeId);
-      const recipeFromDb = currentRecipesFromDb[0];
-      const recipe = {
-        id: recipeId,
-        produced: {
-          id: recipeFromDb.produceditemid,
-          name: recipeFromDb.produceditemname,
+    currentRecipesFromDb.forEach((currentRecipeFromDb) => {
+      const itemAndCount = {
+        item: {
+          id: currentRecipeFromDb.consumptionitemid,
+          name: currentRecipeFromDb.consumptionitemname,
         } as Item,
-        producingPerMinute: recipeFromDb.perminute,
-        consumption: [],
-      } as Recipe;
-
-      currentRecipesFromDb.forEach((currentRecipeFromDb) => {
-        const itemAndCount = {
-          item: {
-            id: currentRecipeFromDb.consumptionitemid,
-            name: currentRecipeFromDb.consumptionitemname,
-          } as Item,
-          count: currentRecipeFromDb.consumptioncount,
-        } as ItemAndCount;
-        recipe.consumption.push(itemAndCount);
-      });
-
-      recipes.push(recipe);
+        count: currentRecipeFromDb.consumptioncount,
+      } as ItemAndCount;
+      recipe.consumption.push(itemAndCount);
     });
 
-    return recipes;
-  }
+    recipes.push(recipe);
+  });
 
-  return {
-    addRecipe,
-    getRecipes,
-    getRecipeByItemId,
-    loading,
-  };
+  return recipes;
 }
 
 type RecipeFromDb = {

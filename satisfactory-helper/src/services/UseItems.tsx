@@ -16,11 +16,10 @@ export const useGetItems = () =>
 
 export const useAddItem = () =>
   useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: (name: string) => {
       const item = { name } as Item;
       const body = JSON.stringify({ item });
-      const id = await fetch('/api/items', { method: 'POST', body: body }).then((res) => res.json());
-      return { id, name };
+      return fetch('/api/items', { method: 'POST', body: body });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });

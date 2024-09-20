@@ -1,18 +1,11 @@
 'use client';
 
-import { Recipe } from '@/models/Recipe';
-import { useRecipe } from '@/services/UseRecipe';
+import { useGetRecipe } from '@/services/UseRecipe';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { Button, ListItem, ListWrapper, RecipeItemSelector, Spinner } from 'smileComponents';
 
 export default function List() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const { getRecipes, loading } = useRecipe();
-
-  useEffect(() => {
-    getRecipes().then(setRecipes);
-  }, []);
+  const { data: recipes, isLoading } = useGetRecipe();
 
   return (
     <div className="flex flex-col gap-2 h-full">
@@ -20,9 +13,9 @@ export default function List() {
         <Button>Создать</Button>
       </Link>
       <div className="grow overflow-y-auto">
-        {!loading ? (
+        {!isLoading ? (
           <ListWrapper>
-            {recipes.map((recipe) => (
+            {recipes?.map((recipe) => (
               <ListItem key={recipe.id}>
                 <div className="recipe flex flex-1">
                   <div className="consumption flex-1">

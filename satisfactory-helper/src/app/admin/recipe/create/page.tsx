@@ -1,22 +1,23 @@
-"use client";
+'use client';
 
-import { Item, ItemAndCount } from "@/models";
-import { Recipe } from "@/models/Recipe";
-import { useRecipe } from "@/services/UseRecipe";
-import { XMarkIcon } from "@heroicons/react/16/solid";
-import { isEqual } from "lodash";
-import Link from "next/link";
-import { useCallback, useState } from "react";
-import { Button, RecipeItemSelector } from "smileComponents";
+import { Item, ItemAndCount } from '@/models';
+import { Recipe } from '@/models/Recipe';
+import { getRecipeByItemId, useAddRecipe } from '@/services/UseRecipe';
+import { XMarkIcon } from '@heroicons/react/16/solid';
+import { isEqual } from 'lodash';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
+import { Button, RecipeItemSelector } from 'smileComponents';
 
 export default function CreateRecipe() {
-  const { addRecipe, getRecipeByItemId } = useRecipe();
-  const [errorMessage, setErrorMessage] = useState("");
+  const addRecipeMutation = useAddRecipe();
+  const router = useRouter();
+
+  const [errorMessage, setErrorMessage] = useState('');
   const [produced, setProduced] = useState<Item>();
   const [producedCount, setProducedCount] = useState<number>();
-  const [consumptions, setConsumptions] = useState<ItemAndCount[]>([
-    {} as ItemAndCount,
-  ]);
+  const [consumptions, setConsumptions] = useState<ItemAndCount[]>([{} as ItemAndCount]);
 
   const updateProduced = useCallback(
     (itemAndCount: ItemAndCount) => {
@@ -46,43 +47,38 @@ export default function CreateRecipe() {
     setConsumptions((old) => [...old, {} as ItemAndCount]);
   }, [setConsumptions]);
 
-  const createRecipe = useCallback(() => {
+  const createRecipe = useCallback(async () => {
     if (!produced) {
       console.error("fail. User didn't choose item");
       setErrorMessage("fail. User didn't choose item");
       return;
     }
-    getRecipeByItemId(produced.id).then((x) => {
-      if (x?.id) {
-        console.error("fail. There is recipe for the item");
-        setErrorMessage("fail. There is recipe for the item");
-        return;
-      }
+    const x = await getRecipeByItemId(produced.id);
+    if (x?.id) {
+      console.error('fail. There is recipe for the item');
+      setErrorMessage('fail. There is recipe for the item');
+      return;
+    }
 
-      const recipe = {
-        produced,
-        consumption: consumptions,
-        producingPerMinute: producedCount,
-      } as Recipe;
-      addRecipe(recipe);
-    });
+    const recipe = {
+      produced,
+      consumption: consumptions,
+      producingPerMinute: producedCount,
+    } as Recipe;
+    await addRecipeMutation.mutate(recipe);
+    router.push('/admin/recipe/list');
   }, [produced, producedCount, consumptions]);
 
   const clearRecipe = useCallback(() => {
     setConsumptions([{} as ItemAndCount]);
   }, [produced, producedCount, consumptions]);
 
-  const disabled =
-    consumptions.some(({ item, count }) => !item || !count) ||
-    !produced ||
-    !producedCount;
+  const disabled = consumptions.some(({ item, count }) => !item || !count) || !produced || !producedCount;
 
   return (
     <div className="flex flex-col gap-4">
       <h2 className="mb-4 flex items-center">
-        <span className="text-2xl text-amber-500 text-center grow">
-          Создание Рецепта
-        </span>
+        <span className="text-2xl text-amber-500 text-center grow">Создание Рецепта</span>
         <Link href="/admin/recipe/list">
           <XMarkIcon className="size-6" />
         </Link>
@@ -97,17 +93,12 @@ export default function CreateRecipe() {
               key={index}
               item={consumption.item}
               count={consumption.count}
-              onChange={(itemAndCount) =>
-                updateConsumption(index, itemAndCount)
-              }
+              onChange={(itemAndCount) => updateConsumption(index, itemAndCount)}
             ></RecipeItemSelector>
           ))}
           <div className="flex gap-1">
             <Button onClick={addConsumption}>+</Button>
-            <Button
-              onClick={clearRecipe}
-              className="!bg-neutral-800 text-neutral-50"
-            >
+            <Button onClick={clearRecipe} className="!bg-neutral-800 text-neutral-50">
               Очистить
             </Button>
           </div>
@@ -119,11 +110,7 @@ export default function CreateRecipe() {
         </div>
       </div>
       <div className="self-center">
-        <Button
-          onClick={createRecipe}
-          disabled={disabled}
-          className="bg-amber-500"
-        >
+        <Button onClick={createRecipe} disabled={disabled} className="bg-amber-500">
           Создать
         </Button>
       </div>
