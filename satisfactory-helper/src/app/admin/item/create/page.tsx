@@ -6,15 +6,16 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { Item } from '@/models';
+import { useRouter } from 'next/navigation';
 
 export default function CreateRecipe() {
+  const router = useRouter();
   const [name, setName] = useState('');
-  const [items, setItems] = useState<Item[]>([]);
 
-  const { addItem, getItemsFromCache } = useItems();
+  const { addItem, getItems, items } = useItems();
 
   useEffect(() => {
-    getItemsFromCache().then(setItems);
+    getItems();
   }, []);
 
   const onNameChange = useCallback((evt: ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +23,13 @@ export default function CreateRecipe() {
   }, []);
 
   const create = useCallback(() => {
-    addItem(name);
+    addItem(name).then(() => router.push('/admin/item/list'));
+  }, [name]);
+
+  const createAndStay = useCallback(async () => {
+    setName('');
+    await addItem(name);
+    await getItems();
   }, [name]);
 
   const getFilteredItems = useCallback(
@@ -47,9 +54,12 @@ export default function CreateRecipe() {
           <li>{item.name}</li>
         ))}
       </ul>
-      <div className="self-center">
+      <div className="self-center flex gap-2">
         <Button onClick={create} disabled={!name.trim()} className="bg-amber-500">
-          Create
+          Создать
+        </Button>
+        <Button onClick={createAndStay} disabled={!name.trim()} className="bg-amber-500">
+          Создать и остаться
         </Button>
       </div>
     </div>
