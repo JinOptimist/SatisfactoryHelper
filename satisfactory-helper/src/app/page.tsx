@@ -1,12 +1,8 @@
-import Outpost from './outpost/page';
-
 export default function Home() {
   return (
-    <div className="bg-hero bg-no-repeat bg-right-bottom grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Outpost />
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">smile</footer>
+    <div className="relative w-full h-full">
+      <h1 className="text-6xl text-satisfactory p-10 text-center">Привет!</h1>
+      <div className="bg-hero bg-no-repeat bg-right-bottom absolute w-full h-full -right-4 -bottom-4"></div>
     </div>
   );
 }
