@@ -1,48 +1,28 @@
+'use client';
+
 import { Item } from '@/models';
-import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient } from './client';
 
-export function useItems() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+export const useGetItems = () =>
+  useQuery<Item[]>({
+    retry: 1,
+    queryKey: ['items'],
+    queryFn: () =>
+      fetch('/api/items', { method: 'GET' })
+        .then((res) => res.json())
+        .catch(() => []),
+  });
 
-  const addItem = async (name: string) => {
-    try {
-      setLoading(true);
+export const useAddItem = () =>
+  useMutation({
+    mutationFn: async (name: string) => {
       const item = { name } as Item;
       const body = JSON.stringify({ item });
-      await fetch('/api/items', { method: 'POST', body: body });
-      await getItems();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getItems = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/items', { method: 'GET' });
-      const items = (await response.json()) as Item[];
-      setItems(items);
-      return [...items];
-    } catch (e) {
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getItemsFromCache = async () => {
-    if (!items.length) {
-      return getItems();
-    }
-    return [...items];
-  };
-
-  return {
-    addItem,
-    getItems,
-    getItemsFromCache,
-    items,
-    loading,
-  };
-}
+      const id = await fetch('/api/items', { method: 'POST', body: body }).then((res) => res.json());
+      return { id, name };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });

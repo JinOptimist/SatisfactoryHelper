@@ -1,39 +1,38 @@
 'use client';
 
 import { InputField, Button } from 'smileComponents';
-import { useItems } from '@/services/UseItems';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { useAddItem, useGetItems } from '@/services/UseItems';
+import { ChangeEvent, useCallback, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { Item } from '@/models';
 import { useRouter } from 'next/navigation';
 
 export default function CreateRecipe() {
   const router = useRouter();
   const [name, setName] = useState('');
 
-  const { addItem, getItems, items } = useItems();
-
-  useEffect(() => {
-    getItems();
-  }, []);
+  const { data: items } = useGetItems();
+  const addItemMutation = useAddItem();
 
   const onNameChange = useCallback((evt: ChangeEvent<HTMLInputElement>) => {
     setName(evt.target.value);
   }, []);
 
   const create = useCallback(() => {
-    addItem(name).then(() => router.push('/admin/item/list'));
+    addItemMutation.mutate(name, {
+      onSuccess: () => {
+        router.push('/admin/item/list');
+      },
+    });
   }, [name]);
 
   const createAndStay = useCallback(async () => {
     setName('');
-    await addItem(name);
-    await getItems();
+    addItemMutation.mutate(name);
   }, [name]);
 
   const getFilteredItems = useCallback(
-    () => items.filter((item) => item.name.toLowerCase().includes(name.toLowerCase())),
+    () => (items || []).filter((item) => item.name.toLowerCase().includes(name.toLowerCase())),
     [name, items]
   );
 

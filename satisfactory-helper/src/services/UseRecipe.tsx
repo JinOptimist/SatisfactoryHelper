@@ -1,3 +1,5 @@
+'use client';
+
 import { Item } from '@/models';
 import { ItemAndCount, Recipe } from '@/models/Recipe';
 import _ from 'lodash';

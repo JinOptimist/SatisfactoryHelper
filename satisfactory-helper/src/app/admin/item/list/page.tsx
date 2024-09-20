@@ -1,22 +1,17 @@
 'use client';
 
 import { Item } from '@/models';
-import { useItems } from '@/services/UseItems';
+import { useGetItems } from '@/services/UseItems';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ListWrapper, ListItem, Button, Spinner, InputField } from 'smileComponents';
 
 export default function List() {
   const [search, setSearch] = useState<string>('');
-  const [items, setItems] = useState<Item[]>([]);
-  const { getItems, loading } = useItems();
-
-  useEffect(() => {
-    getItems().then(setItems);
-  }, []);
+  const { data: items, isLoading } = useGetItems();
 
   const getFilteredItems = useCallback(
-    () => items.filter(({ name }) => name.toLowerCase().includes(search.toLowerCase())),
+    () => (items || []).filter(({ name }) => name.toLowerCase().includes(search.toLowerCase())),
     [search, items]
   );
 
@@ -26,7 +21,7 @@ export default function List() {
       <Link href="/admin/item/create" className="self-end">
         <Button>Создать</Button>
       </Link>
-      {!loading ? (
+      {!isLoading ? (
         <div className="grow overflow-y-auto">
           <ListWrapper>
             {getFilteredItems().map((x) => (

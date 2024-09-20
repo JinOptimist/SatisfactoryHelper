@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 
 import { Item } from '@/models';
-import { useItems } from '@/services/UseItems';
+import { useGetItems } from '@/services/UseItems';
 import { InputField } from './Input';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 import { isNumber } from 'lodash';
@@ -17,15 +17,10 @@ type RecipeItemSelectorProps = {
 };
 
 export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemSelectorProps) => {
-  const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<Item | undefined>(undefined);
   const [count, setCount] = useState<number>(0);
-  const { getItemsFromCache } = useItems();
-
-  useEffect(() => {
-    getItemsFromCache().then(setItems);
-  }, []);
+  const { data: items } = useGetItems();
 
   useEffect(() => {
     if (props.item) {
@@ -42,7 +37,7 @@ export const RecipeItemSelector = ({ onChange, readonly, ...props }: RecipeItemS
   }, [props.count]);
 
   const getItems = useCallback(
-    () => items.filter(({ name }) => name.toLowerCase().includes(search.toLowerCase())),
+    () => (items || []).filter(({ name }) => name.toLowerCase().includes(search.toLowerCase())),
     [search, items]
   );
 

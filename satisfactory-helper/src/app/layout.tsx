@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Navigation } from 'smileComponents';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/services/client';
 
 const geistSans = localFont({
   src: '../../public/fonts/GeistVF.woff',
@@ -25,13 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-800`}>
-        <div className="flex flex-col items-center h-screen p-4 gap-4">
-          <Navigation />
-          <div className="grow overflow-y-auto max-w-screen-lg w-full rounded-lg bg-neutral-600 p-4">{children}</div>
-        </div>
-      </body>
-    </html>
+    <QueryClientProvider client={queryClient}>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-800`}>
+          <div className="flex flex-col items-center h-screen p-4 gap-4">
+            <Navigation />
+            <div className="grow overflow-y-auto max-w-screen-lg w-full rounded-lg bg-neutral-600 p-4">{children}</div>
+          </div>
+        </body>
+      </html>
+    </QueryClientProvider>
   );
 }
