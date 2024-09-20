@@ -14,10 +14,7 @@ export default function Outpost() {
   );
 
   const [totalConsumption, setTotalConsumption] = useState<ItemAndCount[]>([]);
-
-  //   const [itemDeepInfo, setItemDeepInfo] = useState<ItemDeepInfo>(
-  //     {} as ItemDeepInfo
-  //   );
+  const [totalRemains, setTotalRemains] = useState<ItemAndCount[]>([]);
 
   const onChangeRecipe = useCallback(
     (index: number, itemAndCount: ItemAndCount) => {
@@ -65,27 +62,37 @@ export default function Outpost() {
       return;
     }
 
-    const totalConsumption: ItemAndCount[] = producedOnOutpost
+    const totalConsumption: ItemAndCount[] = [];
+    const remains: ItemAndCount[] = [];
+
+    producedOnOutpost
       .filter(x => x.recipe)
-      //.map(x => x.recipe.consumption)
-      .reduce((total: ItemAndCount[], itemInfo) => {
+      .forEach((itemInfo) => {
         const consumptionFromOneRecipe = itemInfo.recipe.consumption;
         consumptionFromOneRecipe.forEach(itemAndCount => {
-          const existedItem = total.find(x => x.item.id == itemAndCount.item.id);
+          const existedItem = totalConsumption.find(x => x.item.id == itemAndCount.item.id);
           if (existedItem) {
             existedItem.count += itemAndCount.count
           } else {
-            total.push({
+            totalConsumption.push({
               item: itemAndCount.item,
               count: itemAndCount.count * itemInfo.factoryCount
             });
           }
         });
 
-        return total
-      }, []);
+        remains.push({
+          item: itemInfo.recipe.produced,
+          count: itemInfo.totalPerMinute
+        });
+      });
 
     totalConsumption.forEach(consumption => {
+      var peaceOfRemains = remains.find(x => x.item.id == consumption.item.id);
+      if (peaceOfRemains){
+        peaceOfRemains.count -= consumption.count;
+      }
+
       const producing = realProducing.find(x => x.recipe.produced.id == consumption.item.id);
       if (producing) {
         consumption.count -= producing.totalPerMinute;
@@ -93,8 +100,10 @@ export default function Outpost() {
     })
 
     const totalConsumptionMinusProducing = totalConsumption.filter(c => c.count > 0);
+    const totalProducingMinusConsumption = remains.filter(c => c.count > 0);
 
     setTotalConsumption(totalConsumptionMinusProducing);
+    setTotalRemains(totalProducingMinusConsumption);
   }, [producedOnOutpost]);
 
   return (
@@ -114,9 +123,21 @@ export default function Outpost() {
         ))}
       </div>
       <div className="flex-1">
-        Закидываем на эту площадку
+        <div>Закидываем на эту площадку</div>
         <div>
           {totalConsumption.map(({ item, count }) => (
+            <RecipeItemSelector
+              key={item.id}
+              item={item}
+              count={count}
+              readonly
+            />
+          ))}
+        </div>
+
+        <div>Остаток</div>
+        <div>
+          {totalRemains.map(({ item, count }) => (
             <RecipeItemSelector
               key={item.id}
               item={item}
