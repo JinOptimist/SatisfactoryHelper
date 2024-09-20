@@ -12,7 +12,7 @@ const tabs = [
 export const Navigation = () => {
   const pathname = usePathname();
   return (
-    <div className="flex flex-row max-w-screen-lg w-full justify-center gap-3 px-10 bg-neutral-900 rounded-lg">
+    <div className="flex flex-row max-w-screen-lg w-full justify-center gap-3 px-10 bg-neutral-900 rounded-lg print:hidden">
       {tabs.map((tabProps, index) => (
         <Link
           {...tabProps}
