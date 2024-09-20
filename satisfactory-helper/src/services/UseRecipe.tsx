@@ -1,32 +1,38 @@
-import { Item } from "@/models";
-import { ItemAndCount, Recipe } from "@/models/Recipe";
-import _ from "lodash";
-import { useRouter } from "next/navigation";
+import { Item } from '@/models';
+import { ItemAndCount, Recipe } from '@/models/Recipe';
+import _ from 'lodash';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function useRecipe() {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
 
   function addRecipe(recipe: Recipe) {
     const body = JSON.stringify({ recipe });
-    fetch("/api/recipes", { method: "POST", body: body })
+    fetch('/api/recipes', { method: 'POST', body: body })
       .then((response) => response.json())
       .then(() => {
-        router.push("/admin/recipe/list");
+        router.push('/admin/recipe/list');
       });
   }
 
-  function getRecipes() {
-    return fetch("/api/recipes", { method: "GET" })
-      .then((response) => response.json())
-      .then((data) => {
-        const recipesFromDb = data as RecipeFromDb[];
-        const recipes = mapRecipeFromDbToRecipe(recipesFromDb);
-        return recipes;
-      });
-  }
+  const getRecipes = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/recipes', { method: 'GET' });
+      const recipesFromDb = (await response.json()) as RecipeFromDb[];
+      const recipes = mapRecipeFromDbToRecipe(recipesFromDb);
+      return recipes;
+    } catch (e) {
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function getRecipeByItemId(itemId: number): Promise<Recipe> {
-    return fetch(`/api/recipes/${itemId}`, { method: "GET" })
+    return fetch(`/api/recipes/${itemId}`, { method: 'GET' })
       .then((response) => response.json())
       .then((data) => {
         const recipesFromDb = data as RecipeFromDb[];
@@ -41,9 +47,7 @@ export function useRecipe() {
 
     const recipeIds = _.uniq(recipesFromDb.map((x) => x.recipeid));
     recipeIds.forEach((recipeId) => {
-      const currentRecipesFromDb = recipesFromDb.filter(
-        (x) => x.recipeid == recipeId
-      );
+      const currentRecipesFromDb = recipesFromDb.filter((x) => x.recipeid == recipeId);
       const recipeFromDb = currentRecipesFromDb[0];
       const recipe = {
         id: recipeId,
@@ -76,6 +80,7 @@ export function useRecipe() {
     addRecipe,
     getRecipes,
     getRecipeByItemId,
+    loading,
   };
 }
 

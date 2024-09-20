@@ -6,3 +6,4 @@ export { ListWrapper, ListItem } from './List';
 export { InputField } from './Input';
 export { Button } from './Button';
 export { RecipeItemSelector } from './RecipeItemSelector';
+export { Spinner } from './Spinner';
