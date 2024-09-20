@@ -1,18 +1,14 @@
-"use client";
+'use client';
 
-import { ItemAndCount } from "@/models";
-import { Recipe } from "@/models/Recipe";
-import { useRecipe } from "@/services/UseRecipe";
-import { useCallback, useEffect, useState } from "react";
-import { Button, RecipeItemSelector, Spinner } from "smileComponents";
+import { ItemAndCount } from '@/models';
+import { Recipe } from '@/models/Recipe';
+import { useCallback, useEffect, useState } from 'react';
+import { Button, RecipeItemSelector, Spinner } from 'smileComponents';
 import './print.css';
+import { getRecipeByItemId } from '@/services/UseRecipe';
 
 export default function Outpost() {
-  const { getRecipeByItemId } = useRecipe();
-
-  const [producedOnOutpost, setProducedOnOutpost] = useState<ItemDeepInfo[]>([
-    {} as ItemDeepInfo,
-  ]);
+  const [producedOnOutpost, setProducedOnOutpost] = useState<ItemDeepInfo[]>([{} as ItemDeepInfo]);
 
   const [totalConsumption, setTotalConsumption] = useState<ItemAndCount[]>([]);
   const [totalRemains, setTotalRemains] = useState<ItemAndCount[]>([]);
@@ -20,21 +16,20 @@ export default function Outpost() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const onChangeRecipe = useCallback(
-    (index: number, itemAndCount: ItemAndCount) => {
+    async (index: number, itemAndCount: ItemAndCount) => {
       const itemInfo = producedOnOutpost[index];
 
       if (itemAndCount.item.id !== itemInfo?.recipe?.produced?.id) {
-        getRecipeByItemId(itemAndCount.item.id).then((recipe) => {
-          setProducedOnOutpost((oldProducedOnOutpost) => {
-            const newProducedOnOutpost = [...oldProducedOnOutpost];
-            newProducedOnOutpost[index] = {
-              recipe,
-              factoryCount: itemAndCount.count,
-              totalPerMinute: recipe.producingPerMinute * itemAndCount.count,
-            } as ItemDeepInfo;
+        const recipe = await getRecipeByItemId(itemAndCount.item.id);
+        setProducedOnOutpost((oldProducedOnOutpost) => {
+          const newProducedOnOutpost = [...oldProducedOnOutpost];
+          newProducedOnOutpost[index] = {
+            recipe,
+            factoryCount: itemAndCount.count,
+            totalPerMinute: (recipe?.producingPerMinute || 0) * itemAndCount.count,
+          } as ItemDeepInfo;
 
-            return newProducedOnOutpost;
-          });
+          return newProducedOnOutpost;
         });
       } else {
         setProducedOnOutpost((oldProducedOnOutpost) => {
@@ -77,9 +72,7 @@ export default function Outpost() {
       .forEach((itemInfo) => {
         const consumptionFromOneRecipe = itemInfo.recipe.consumption;
         consumptionFromOneRecipe.forEach((itemAndCount) => {
-          const existedItem = totalConsumption.find(
-            (x) => x.item.id == itemAndCount.item.id
-          );
+          const existedItem = totalConsumption.find((x) => x.item.id == itemAndCount.item.id);
           if (existedItem) {
             existedItem.count += itemAndCount.count;
           } else {
@@ -97,24 +90,18 @@ export default function Outpost() {
       });
 
     totalConsumption.forEach((consumption) => {
-      var peaceOfRemains = remains.find(
-        (x) => x.item.id == consumption.item.id
-      );
+      var peaceOfRemains = remains.find((x) => x.item.id == consumption.item.id);
       if (peaceOfRemains) {
         peaceOfRemains.count -= consumption.count;
       }
 
-      const producing = realProducing.find(
-        (x) => x.recipe.produced.id == consumption.item.id
-      );
+      const producing = realProducing.find((x) => x.recipe.produced.id == consumption.item.id);
       if (producing) {
         consumption.count -= producing.totalPerMinute;
       }
     });
 
-    const totalConsumptionMinusProducing = totalConsumption.filter(
-      (c) => c.count > 0
-    );
+    const totalConsumptionMinusProducing = totalConsumption.filter((c) => c.count > 0);
     const totalProducingMinusConsumption = remains.filter((c) => c.count > 0);
 
     setLoading(false);
@@ -122,20 +109,16 @@ export default function Outpost() {
     setTotalRemains(totalProducingMinusConsumption);
   }, [producedOnOutpost]);
 
-  const isProduceTargetSelected = producedOnOutpost.find(
-    ({ recipe }) => !!recipe
-  );
+  const isProduceTargetSelected = producedOnOutpost.find(({ recipe }) => !!recipe);
 
   const onPrint = useCallback(() => {
-	print();
+    print();
   }, []);
 
   return (
     <div className="flex flex-col gap-4 outpost">
       <h2 className="mb-4 flex items-center">
-        <span className="text-2xl text-amber-500 text-center grow">
-          Аванпост
-        </span>
+        <span className="text-2xl text-amber-500 text-center grow">Аванпост</span>
       </h2>
       <div className="flex gap-4">
         <div className="flex-1">
@@ -149,9 +132,7 @@ export default function Outpost() {
               ></RecipeItemSelector>
 
               {isProduceTargetSelected && (
-                <h3 className="text-lg mb-4">
-                  Производиться в минуту: {itemInfo?.totalPerMinute}
-                </h3>
+                <h3 className="text-lg mb-4">Производиться в минуту: {itemInfo?.totalPerMinute}</h3>
               )}
             </div>
           ))}
@@ -160,10 +141,7 @@ export default function Outpost() {
             <Button onClick={addProducing} className="bg-amber-500">
               +
             </Button>
-            <Button
-              onClick={clearRecipe}
-              className="!bg-neutral-800 text-neutral-50"
-            >
+            <Button onClick={clearRecipe} className="!bg-neutral-800 text-neutral-50">
               Очистить
             </Button>
           </div>
@@ -179,24 +157,14 @@ export default function Outpost() {
             <h3 className="text-lg mb-2">Закидываем на эту площадку</h3>
             <div>
               {totalConsumption.map(({ item, count }) => (
-                <RecipeItemSelector
-                  key={item.id}
-                  item={item}
-                  count={count}
-                  readonly
-                />
+                <RecipeItemSelector key={item.id} item={item} count={count} readonly />
               ))}
             </div>
 
             <h3 className="text-lg mb-2">Остаток</h3>
             <div>
               {totalRemains.map(({ item, count }) => (
-                <RecipeItemSelector
-                  key={item.id}
-                  item={item}
-                  count={count}
-                  readonly
-                />
+                <RecipeItemSelector key={item.id} item={item} count={count} readonly />
               ))}
             </div>
           </div>
